@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowUpIcon,
-  ArrowDownIcon,
-  CpuIcon,
-  HardDriveIcon,
-} from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon, CpuIcon } from "lucide-react";
 
 interface WidgetProps {
   url: string;
@@ -25,7 +20,7 @@ const Widget: React.FC<WidgetProps> = ({ url }) => {
     },
   });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const cpuUrl = new URL("/load/cpu", url).toString();
       const ramUrl = new URL("/load/ram", url).toString();
@@ -87,14 +82,14 @@ const Widget: React.FC<WidgetProps> = ({ url }) => {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  };
+  }, [url]);
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 3000); // Fetch data every 3 seconds
 
     return () => clearInterval(interval);
-  }, [url]);
+  }, [fetchData]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

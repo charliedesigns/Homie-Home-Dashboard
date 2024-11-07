@@ -29,39 +29,21 @@ import Widget from "@/components/widgets";
 import Favourites from "@/components/favourites";
 import { DashItemProps } from "@/app/types";
 
-const DashItem: React.FC<{
-  id: string;
-  name: string;
-  url: string;
-  imageurl?: string;
-  editMode: boolean;
-  onRemove: (id: string) => void;
-}> = ({ id, name, url, imageurl, editMode, onRemove }) => {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id, disabled: !editMode });
-  const style = {
-    transform: transform
-      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      : undefined,
-    opacity: isDragging ? 0.5 : 1,
-  };
+// Utility function to move an item in an array from one position to another
+const arrayMove = <T,>(array: T[], from: number, to: number): T[] => {
+  const newArray = array.slice();
+  const [movedItem] = newArray.splice(from, 1);
+  newArray.splice(to, 0, movedItem);
+  return newArray;
+};
+
+const DashItem: React.FC<{ id: string; name: string; url: string; imageurl?: string; editMode: boolean; onRemove: (id: string) => void }> = ({ id, name, url, imageurl, editMode, onRemove }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id, disabled: !editMode });
+  const style = { transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined, opacity: isDragging ? 0.5 : 1 };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className="relative"
-    >
-      <a
-        href={editMode ? undefined : url}
-        target={editMode ? undefined : "_blank"}
-        rel={editMode ? undefined : "noopener noreferrer"}
-        className="block"
-        title={name}
-        onClick={editMode ? (e) => e.preventDefault() : undefined}
-      >
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="relative">
+      <a href={editMode ? undefined : url} target={editMode ? undefined : "_blank"} rel={editMode ? undefined : "noopener noreferrer"} className="block" title={name} onClick={editMode ? (e) => e.preventDefault() : undefined}>
         <Card className="w-24 h-24 rounded-xl hover:shadow-lg transition-shadow duration-300 flex items-center justify-center">
           <CardContent className="p-0">
             {imageurl ? (
@@ -73,10 +55,7 @@ const DashItem: React.FC<{
         </Card>
       </a>
       {editMode && (
-        <button
-          onClick={() => onRemove(id)}
-          className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-        >
+        <button onClick={() => onRemove(id)} className="absolute top-2 right-2 text-red-500 hover:text-red-700">
           <X className="h-4 w-4" />
         </button>
       )}
@@ -84,11 +63,7 @@ const DashItem: React.FC<{
   );
 };
 
-const AddServiceDialog = ({
-  onAddService,
-}: {
-  onAddService: (name: string, url: string, imageurl: string) => void;
-}) => {
+const AddServiceDialog = ({ onAddService }: { onAddService: (name: string, url: string, imageurl: string) => void }) => {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [imageurl, setImageUrl] = useState("");
@@ -111,44 +86,21 @@ const AddServiceDialog = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Service</DialogTitle>
-          <DialogDescription>
-            Enter the details of the service you want to add to your dashboard.
-          </DialogDescription>
+          <DialogDescription>Enter the details of the service you want to add to your dashboard.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="col-span-3"
-              />
+              <Label htmlFor="name" className="text-right">Name</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="url" className="text-right">
-                URL
-              </Label>
-              <Input
-                id="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="col-span-3"
-              />
+              <Label htmlFor="url" className="text-right">URL</Label>
+              <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="imageurl" className="text-right">
-                Image URL
-              </Label>
-              <Input
-                id="imageurl"
-                value={imageurl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="col-span-3"
-              />
+              <Label htmlFor="imageurl" className="text-right">Image URL</Label>
+              <Input id="imageurl" value={imageurl} onChange={(e) => setImageUrl(e.target.value)} className="col-span-3" />
             </div>
           </div>
           <DialogFooter>
@@ -160,11 +112,7 @@ const AddServiceDialog = ({
   );
 };
 
-const DashsetupDialog = ({
-  onAddService,
-}: {
-  onAddService: (url: string) => void;
-}) => {
+const DashsetupDialog = ({ onAddService }: { onAddService: (url: string) => void }) => {
   const [url, setUrl] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -183,22 +131,13 @@ const DashsetupDialog = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Dashdot setup</DialogTitle>
-          <DialogDescription>
-            Enter your address of dashdot + port (usually 8173)
-          </DialogDescription>
+          <DialogDescription>Enter your address of dashdot + port (usually 8173)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="url" className="text-right">
-                URL
-              </Label>
-              <Input
-                id="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="col-span-3"
-              />
+              <Label htmlFor="url" className="text-right">URL</Label>
+              <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} className="col-span-3" />
             </div>
           </div>
           <DialogFooter>
@@ -242,10 +181,7 @@ export default function Home() {
   }, [dashdotUrl]);
 
   const addService = (name: string, url: string, imageurl: string) => {
-    setServices([
-      ...services,
-      { id: `${name}-${Date.now()}`, name, url, imageurl },
-    ]);
+    setServices([...services, { id: `${name}-${Date.now()}`, name, url, imageurl }]);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -287,11 +223,7 @@ export default function Home() {
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-5 px-80 py-5 dark">
         <div className="flex justify-between items-center">
           <h1 className="text-xl">Favourites</h1>
@@ -300,11 +232,7 @@ export default function Home() {
           </Button>
         </div>
         <div className="flex flex-col gap-2">
-          <Favourites
-            favourites={favourites}
-            editMode={editMode}
-            onRemove={handleRemoveFavourite}
-          />
+          <Favourites favourites={favourites} editMode={editMode} onRemove={handleRemoveFavourite} />
         </div>
         <div className="flex flex-col gap-2">
           <h1 className="text-xl">Server Status</h1>
@@ -319,20 +247,9 @@ export default function Home() {
             <h1 className="text-xl">Apps</h1>
             <AddServiceDialog onAddService={addService} />
           </div>
-          <div
-            ref={setAppsNodeRef}
-            className="flex flex-row flex-wrap gap-3 p-4"
-          >
+          <div ref={setAppsNodeRef} className="flex flex-row flex-wrap gap-3 p-4">
             {services.map((service, index) => (
-              <DashItem
-                key={index}
-                id={service.id}
-                name={service.name}
-                url={service.url}
-                imageurl={service.imageurl}
-                editMode={editMode}
-                onRemove={handleRemoveService}
-              />
+              <DashItem key={index} id={service.id} name={service.name} url={service.url} imageurl={service.imageurl} editMode={editMode} onRemove={handleRemoveService} />
             ))}
           </div>
         </div>
